@@ -24,6 +24,7 @@ def plt_scatter_map_covid(df_change):
     fig, axes = plt.subplots(nrs, ncs, figsize=(w, h), layout="constrained")
     bound_lv1 = gpd.read_file(UK_SHP_ADM1)
     index_fig = [["a", "b"], ["c", "d"]]
+    huem = 35
     for i, p in enumerate(DATE_2020.keys()):
         for j, col in enumerate(["2020-2019", OBS_BAU_COL]):
             bound_lv1.plot(ax=axes[i, j], facecolor="white", edgecolor="black", lw=0.7)
@@ -32,7 +33,7 @@ def plt_scatter_map_covid(df_change):
                 x=df_change.centroid.x,
                 y=df_change.centroid.y,
                 hue=f"{col} {p}",
-                hue_norm=(-25, 25),
+                hue_norm=(-1 * huem, huem),
                 size="Population",
                 sizes=(50, 500),
                 palette=CMAP_NO2,
@@ -54,7 +55,7 @@ def plt_scatter_map_covid(df_change):
                 edgecolor="black",
             )
             legend.get_frame().set_alpha(None)
-    norm = plt.Normalize(-25, 25)
+    norm = plt.Normalize(-1 * huem, huem)
     sm = plt.cm.ScalarMappable(cmap=CMAP_NO2, norm=norm)
     sm.set_array([])
     fig.colorbar(
@@ -78,7 +79,7 @@ def plt_line_ts_adm(ds, list_city):
         df_city = ds[city].mean(["lat", "lon"], skipna=True).to_dataframe()
 
         for j, y in enumerate([2019, 2020, 2021, 2022]):
-            df = get_nday_mean(df_city[f"{y}-01-01":f"{y}-10-31"], 7)
+            df = get_nday_mean(df_city[f"{y}-02-01":f"{y}-07-31"], 5)
             ax = axes[i, j]
             sns.lineplot(
                 df,
@@ -193,7 +194,7 @@ def plot_obs_year():
     cb_mean.ax.tick_params(labelsize=30)
 
 
-def plt_met_dist(ds):
+def plt_met_dist(ds, var="blh"):
     u10 = ds.era5["u10"]
     v10 = ds.era5["v10"]
     ds.era5["wind"] = np.sqrt(u10**2 + v10**2)
@@ -203,7 +204,7 @@ def plt_met_dist(ds):
         "blh": "Boundary layer height (m)",
     }
     ylabel = "Relative Frequency (%)"
-    var = "blh"
+    # var = "blh"
 
     for i, p in enumerate(DATE_2020.keys()):
         nrs, ncs = 1, 1

@@ -25,37 +25,44 @@ EVENTS = [
     "Other",
 ]
 
-POP_ADMS = [
-    "Kyiv",
-    "Kharkivskyi",
-    "Odeskyi",
-    "Dniprovskyi",
-    "Donetskyi",
-    "Zaporizkyi",
-    "Lvivskyi",
-    "Kryvorizkyi",
-    "Mykolaivskyi",
+ADM2_DICT_CITIES = {
+    "Kyiv": {"min": 0, "max": 100},
+    "Kharkivskyi": {"min": 0, "max": 60},
+    # "Odeskyi",
+    "Dniprovskyi": {"min": 0, "max": 60},
+    # "Donetskyi",
+    "Zaporizkyi": {"min": 0, "max": 60},
+    # "Lvivskyi",
+    "Kryvorizkyi": {"min": 0, "max": 60},
+    # "Mykolaivskyi",
     # "Sevastopol", # no data
-]
+}
+ADM2_CITIES = ADM2_DICT_CITIES.keys()
 WAR_ADMS = ["Dnipropetrovska", "Donetska", "Kharkivska", "Luhanska", "Zaporizka"]
-BOR_ADMS = ["Chernivetskyi", "Uzhhorodskyi", "Berehivskyi"]
-LIST_PPLS = [
-    "Zaporizhia TPP",
-    "Mironivskaya TEC",
-    "Zmiivska power station",
-    "Luhanska",
-    "Sievierodonetsk CHP power station",
-    "Vuglegirska power station",
-    "Dobrotvir power station",
-]
-LCKDWN_SD = "2020-04-03"
-LCKDWN_ED = "2020-06-01"
+BOR_DICT_CITIES = {
+    "Chernivetskyi": {"min": 0, "max": 60},
+    "Uzhhorodskyi": {"min": 0, "max": 60},
+    "Berehivskyi": {"min": 0, "max": 60},
+}
+
+DICT_PPLS = {
+    "Zaporizhia TPP": {"min": 0, "max": 80},
+    "Mironivskaya TEC": {"min": 0, "max": 100},
+    # "Zmiivska power station": {"min": 0, "max": 100},
+    "Luhanska": {"min": 0, "max": 100},
+    "Sievierodonetsk CHP power station": {"min": 0, "max": 150},
+    # "Vuglegirska power station",
+}
+LIST_PPLS = DICT_PPLS.keys()
+
+LCKDWN_SD = "2020-04-06"
+LCKDWN_ED = "2020-05-12"
 BF_SD = "2020-03-01"
-BF_ED = "2020-04-02"
+BF_ED = "2020-03-15"
 
 DATE_2020 = {
-    "Before lockdown (03/01 - 04/02)": (BF_SD, BF_ED),
-    "Lockdown (04/03 - 06/01)": (LCKDWN_SD, LCKDWN_ED),
+    "Prelockdown": (BF_SD, BF_ED),
+    "Lockdown": (LCKDWN_SD, LCKDWN_ED),
 }
 
 WAR_SD = "2022-02-24"
@@ -78,20 +85,31 @@ CMAP_NO2 = "RdYlBu_r"
 CMAP_WIND = "Spectral_r"
 
 # level 3
-# POP_ADMS = [
-#     "Kyiv",
-#     "Kharkivska",
-#     "Odeska",  #
-#     "Dniprovska",
-#     "Donetska",
-#     "Zaporizka",
-#     "Lvivska",
-#     "Kryvorizka",
-#     "Mykolaivska",  #
-#     "Mariupolska",
-#     "Luhanska",  #
-#     "Vinnytska",  #
-#     "Simferopolska",
-#     "Makiivska",
-#     "Poltavska",
-# ]
+ADM3_CITIES = [
+    "Kyiv",
+    "Kharkivska",
+    "Odeska",  #
+    "Dniprovska",
+    "Donetska",
+    "Zaporizka",
+    "Lvivska",
+    "Kryvorizka",
+    "Mykolaivska",  #
+    "Mariupolska",
+    "Luhanska",  #
+    "Vinnytska",  #
+    "Simferopolska",
+    "Makiivska",
+    "Poltavska",
+]
+
+# notes for the data processor version
+# old
+# 2019 - 1.3.1
+# 2020 - 1.3.2
+# 2022 - 2.3.1
+
+# rpro
+# 2019 - 2.4.0
+# 2020 - 2.4.0
+# 2022 - 2.4.0

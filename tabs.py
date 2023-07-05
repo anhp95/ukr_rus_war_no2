@@ -11,10 +11,8 @@ from const import *
 
 
 def cal_change_covid(ds):
-
     bounds, _ = get_bound_pop()
     sel_cols = [ADM2_COL]
-
     for p in DATE_2020.keys():
         obs_bau_m = []
         obs_bau_std = []
@@ -25,8 +23,7 @@ def cal_change_covid(ds):
         sd20, ed20 = DATE_2020[p]
         sd19, ed19 = to_d19(sd20), to_d19(ed20)
 
-        for city in POP_ADMS:
-
+        for city in ADM2_CITIES:
             city20 = ds.ds_adm2[city].sel(time=slice(sd20, ed20))
             city19 = ds.ds_adm2[city].sel(time=slice(sd19, ed19))
             # obs_bau dif
@@ -46,6 +43,7 @@ def cal_change_covid(ds):
             bounds[cn] = cv
 
     return bounds, sel_cols
+
 
 def cal_change_war_point(ds):
     conflict_df = prep_conflict_df()
@@ -90,7 +88,7 @@ def cal_change_war_point(ds):
         fdf = fdf.loc[mask]
         fdf = fdf[["OBS_BAU", "OBS_CHANGE", EVENT_COL]]
         city_dfs[city] = fdf
-    
+
     # cal stats
     # df_stats = []
     # for city in city_dfs.keys():
@@ -149,19 +147,21 @@ def cal_change_war(ds):
 
     return cf, sel_cols
 
+
 def tab4_decor(df_org):
     df = copy.deepcopy(df_org)
     cols = ["OBS_BAU", "OBS_CHANGE"]
-    df = df.loc[df[ADM2_COL].isin(POP_ADMS)]
+    df = df.loc[df[ADM2_COL].isin(ADM2_CITIES)]
     sel_cols = [ADM2_COL]
     for col in cols:
         for y in [2020, 2021, 2022]:
             col_m, col_std = f"{col}_{y}", f"{col}_{y}_std"
-            df[col_m] = df[[f"{col}_{m}_{y}" for m in range(2,13)]].mean(axis=1)
-            df[col_std] = df[[f"{col}_{m}_std_{y}" for m in range(2,13)]].mean(axis=1)
+            df[col_m] = df[[f"{col}_{m}_{y}" for m in range(2, 13)]].mean(axis=1)
+            df[col_std] = df[[f"{col}_{m}_std_{y}" for m in range(2, 13)]].mean(axis=1)
             sel_cols = sel_cols + [col_m]
- 
+
     return df.round(1), sel_cols
+
 
 def tab_decor_mstd(df, cols, title):
     def add_std(x, c):
@@ -178,4 +178,3 @@ def tab_decor_mstd(df, cols, title):
     final = decored_df[cols].round(1)
     final.to_csv(f"./data/result_stats/{title}.csv")
     return final
-    

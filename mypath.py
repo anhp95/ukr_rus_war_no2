@@ -1,4 +1,4 @@
-#%%
+# %%
 import os
 import glob
 
@@ -28,13 +28,14 @@ CLIMATE_FILE = glob.glob(os.path.join(CLIMATE_DIR, "era5", "*.grib"))
 
 # NO2
 NO2_DIR = os.path.join(BASE_DIR, "no2")
+NO2_S5P_RPRO_DIR = os.path.join(NO2_DIR, "s5p_tropo_rpro")
 
 SF_REALS_NO2_2019_FILES = glob.glob(os.path.join(NO2_DIR, "cams-reals", "2019", "*.nc"))
 SF_FC_NO2_2020_2022_FILES = sorted(
     glob.glob(os.path.join(NO2_DIR, "cams-fc", "*.grib"))
 )
 
-CL_NO2_FILES = glob.glob(os.path.join(NO2_DIR, "s5p_tropo", "*.tif"))
+CL_NO2_GEE_FILES = glob.glob(os.path.join(NO2_DIR, "s5p_tropo_gee", "*.tif"))
 
 # POP
 POP_FILE = os.path.join(BASE_DIR, "pop", "uk_pop_2020.tif")
@@ -56,7 +57,10 @@ PREPROCESS_DIR = os.path.join(BASE_DIR, "preprocessed")
 CAM_REALS_NO2_NC = os.path.join(PREPROCESS_DIR, "cams_reals_no2.nc")
 CAM_FC_NO2_NC = os.path.join(PREPROCESS_DIR, "cams_fc_no2.nc")
 ERA5_NC = os.path.join(PREPROCESS_DIR, "era5.nc")
-S5P_NO2_NC = os.path.join(PREPROCESS_DIR, "s5p_no2.nc")
+
+S5P_NO2_GEE_NC = os.path.join(PREPROCESS_DIR, "s5p_no2_gee.nc")
+S5P_NO2_RPRO_NC = os.path.join(PREPROCESS_DIR, "s5p_no2_rpro.nc")
+
 POP_NC = os.path.join(PREPROCESS_DIR, "pop.nc")
 
 # deweather

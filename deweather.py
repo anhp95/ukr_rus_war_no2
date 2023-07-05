@@ -18,7 +18,9 @@ from const import *
 from utils import *
 
 # plot figures and tables used in the paper
-from figs import *
+from figs_single_alg import *
+from figs_double_alg import *
+
 from tabs import *
 
 
@@ -28,13 +30,11 @@ class GPULGBM(LGBMEstimator):
 
 
 class Deweather(object):
-    model_path = MODEL_PATH
-
     rate_train = 0.8
     rate_test = 0.2
 
     settings = {
-        "time_budget": 60 * 60 * 10,  # total running time in seconds
+        "time_budget": 60 * 60 * 6.5,  # total running time in seconds 60 * 60 *10
         "metric": "rmse",  # primary metrics for regression can be chosen from: ['mae','mse','r2']
         "task": "regression",  # task type
         "seed": 7654321,  # random seed
@@ -48,7 +48,12 @@ class Deweather(object):
         },
     }
 
-    def __init__(self, cams_reals_nc, cams_fc_nc, era5_nc, s5p_nc, pop_nc) -> None:
+    def __init__(
+        self, cams_reals_nc, cams_fc_nc, era5_nc, s5p_nc, pop_nc, s5p_alg
+    ) -> None:
+        self.s5p_alg = s5p_alg
+        self.model_path = MODEL_PATH.replace(".pkl", f"_v{s5p_alg}.pkl")
+
         self.cams = None
         self.era5 = None
         self.s5p = None
@@ -89,7 +94,8 @@ class Deweather(object):
 
         s5p = xr.open_dataset(s5p_nc)
         self.s5p = s5p.rename(name_dict={list(s5p.keys())[0]: S5P_OBS_COL})
-        self.s5p = self.s5p.isel(band=0)
+
+        self.s5p = self.s5p.isel(band=0) if self.s5p_alg == 1 else self.s5p
 
         pop = xr.open_dataset(pop_nc)
         self.pop = pop.rename(name_dict={list(pop.keys())[0]: "pop"})
@@ -108,12 +114,17 @@ class Deweather(object):
         )
 
     def reform(self, year, list_geo):
-        sd = np.datetime64(f"{year}-01-01T00:00:00.000000000")
-        ed = np.datetime64(f"{year}-12-31T00:00:00.000000000")
+        sd = np.datetime64(f"{year}-02-01T00:00:00.000000000")
+        ed = np.datetime64(f"{year}-07-31T00:00:00.000000000")
 
-        cams_year = self.cams.sel(time=slice(sd, ed))
-        era5_year = self.era5.sel(time=slice(sd, ed))
+        # cams_year = self.cams.sel(time=slice(sd, ed))
+        # era5_year = self.era5.sel(time=slice(sd, ed))
         s5p_year = self.s5p.sel(time=slice(sd, ed))
+
+        s5p_dates = s5p_year.time.values
+
+        cams_year = self.cams.sel(time=self.cams.time.isin(s5p_dates))
+        era5_year = self.era5.sel(time=self.era5.time.isin(s5p_dates))
 
         julian_time = pd.DatetimeIndex(cams_year.time.values).to_julian_date()
         dow = pd.DataFrame(cams_year.time.values)[0].dt.dayofweek.values
@@ -255,6 +266,7 @@ class Deweather(object):
 
         b1 = gpd.read_file(UK_SHP_ADM1)
         b2 = gpd.read_file(UK_SHP_ADM2)
+        b3 = gpd.read_file(UK_SHP_ADM3)
         ppl_b = gpd.read_file(UK_COAL_SHP)
         crs = b2.crs
 
@@ -263,18 +275,33 @@ class Deweather(object):
 
         self.ds_war = clip(self.dw_ds, b1, crs, WAR_ADMS, ADM1_COL)
         self.ds_adm2 = clip(self.dw_ds, b2, crs, list_adm2, ADM2_COL)
+        # self.ds_adm3 = clip(self.dw_ds, b3, crs, ADM3_CITIES, ADM3_COL)
         self.ds_ppl = clip(self.dw_ds, ppl_b, crs, list_ppl, PPL_NAME_COL)
 
 
-# if __name__ == "__main__":
-#     ds = Deweather(CAM_REALS_NO2_NC, CAM_FC_NO2_NC, ERA5_NC, S5P_NO2_NC, POP_NC)
+def met_norm(s5p_alg):
+    s5p_no2_nc = S5P_NO2_RPRO_NC if s5p_alg == 2 else S5P_NO2_GEE_NC
+    return Deweather(
+        CAM_REALS_NO2_NC, CAM_FC_NO2_NC, ERA5_NC, s5p_no2_nc, POP_NC, s5p_alg
+    )
 
 
-# plot_ppl_obs_bau_line_mlt(ds)
-# plot_obs_bau_pop_line_mlt(ds)
-# plot_obs_bau_bubble(ds, year)
-# plot_obs_bubble("covid")
-# plot_weather_params(ds, event="covid")
-# plot_obs_bau_adm2(ds, 2022, "2_no2_bau")
+if __name__ == "__main__":
+    dsv1 = met_norm(1)
+    dsv2 = met_norm(2)
+
+    all_ppl = gpd.read_file(UK_COAL_SHP)[PPL_NAME_COL].values
+    # plt single alg
+    # plt_line_ts_adm(dsv1.ds_ppl, all_ppl)
+    # plt_line_ts_adm(dsv1.ds_adm2, BOR_ADMS)
+    # plt_line_ts_adm(dsv1.ds_adm2, ADM2_CITIES)
+    bounds_v1, _ = cal_change_covid(dsv1)
+    bounds_v2, _ = cal_change_covid(dsv2)
+
+    # plt_scatter_map_covid_2alg(bounds_v1, bounds_v2)
+    plt_line_ts_adm_2alg(dsv1.ds_ppl, dsv2.ds_ppl, DICT_PPLS)
+    plt_line_ts_adm_2alg(dsv1.ds_adm2, dsv2.ds_adm2, ADM2_DICT_CITIES)
+    plt_line_ts_adm_2alg(dsv1.ds_adm2, dsv2.ds_adm2, ADM2_DICT_CITIES)
+
 
 # %%

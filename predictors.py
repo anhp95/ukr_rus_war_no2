@@ -26,10 +26,11 @@ class Predictor:
 
         self.extract_ds()
         self.clip_2_bound()
+        print("clip ok")
         self.group_by_date()
         # self.select_war_time()
         self.interpolate()
-        # self.to_nc()
+        self.to_nc()
 
     def set_years(self):
         return
@@ -55,10 +56,11 @@ class Predictor:
 
     def group_by_date(self):
         if self.flag_group_date:
-            self.org_ds = self.org_ds.sel(
-                time=self.org_ds.time.dt.hour.isin([9, 10, 11, 12])
-            )
-
+            # self.org_ds = self.org_ds.sel(
+            #     time=self.org_ds.time.dt.hour.isin([9, 10, 11, 12])
+            # )
+            # 13:30 pm
+            self.org_ds = self.org_ds.sel(time=self.org_ds.time.dt.hour.isin([13, 14]))
             self.org_ds = self.org_ds.groupby(self.org_ds.time.dt.date).mean()
 
             dates = []
@@ -146,7 +148,9 @@ class CAMS_FC_NO2(Predictor):
     def extract_ds(self):
         list_grib_ds = []
         for grib_file in SF_FC_NO2_2020_2022_FILES:
-            grib_ds = read_grib(grib_file).isel(step=slice(9, 13))
+            # grib_ds = read_grib(grib_file).isel(step=slice(9, 13))
+            # 13:30 pm
+            grib_ds = read_grib(grib_file).isel(step=slice(13, 15))
             grib_ds = grib_ds.mean("step")
             list_grib_ds.append(grib_ds)
 
@@ -164,10 +168,11 @@ class S5P_NO2(Predictor):
     def set_flag_sel_war_time(self):
         self.flag_sel_war_time = False
 
-    def extract_ds(self):
+    # extract S5P GEE dataset
+    def extract_ds_s5p_gee(self):
         sd = pd.to_datetime(0, unit="s").to_julian_date()
         list_tif_ds = []
-        for tif in CL_NO2_FILES:
+        for tif in CL_NO2_GEE_FILES:
             julian_date = float(tif.split("\\")[-1][:-4])
 
             tif_ds = read_tif(tif)
@@ -177,6 +182,26 @@ class S5P_NO2(Predictor):
             list_tif_ds.append(tif_ds)
 
         self.org_ds = xr.concat(list_tif_ds, dim="time")
+
+    # extract S5P RPRO dataset
+    def extract_ds(self):
+        years = [2019, 2020, 2021, 2022]
+        list_ds = []
+
+        for y in years:
+            print(y)
+            list_files = glob.glob(os.path.join(NO2_S5P_RPRO_DIR, f"{y}", "*.nc"))
+            for f in list_files:
+                date = f.split("\\")[-1].split(".")[0]
+                ds = xr.open_dataset(f).rename({"longitude": "lon", "latitude": "lat"})
+                ds["time"] = [pd.to_datetime((date))]
+                ds = ds.rename({"tropospheric_NO2_column_number_density": S5P_OBS_COL})
+                list_ds.append(ds[S5P_OBS_COL])
+
+        self.org_ds = xr.concat(
+            list_ds,
+            dim="time",
+        )
 
 
 class Pop(Predictor):
@@ -198,7 +223,7 @@ if __name__ == "__main__":
     cams_reals_no2 = CAMS_REALS_NO2(CAM_REALS_NO2_NC)
     cams_fc_no2 = CAMS_FC_NO2(CAM_FC_NO2_NC)
     era5 = ERA5(ERA5_NC)
-    s5p_no2 = S5P_NO2(S5P_NO2_NC)
+    s5p_no2 = S5P_NO2(S5P_NO2_RPRO_NC)
     # pop = Pop(POP_NC)
 
 # %%
