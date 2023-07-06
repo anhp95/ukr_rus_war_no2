@@ -297,7 +297,7 @@ def plt_wind_rose(ds, year):
     return wind_d, wf
 
 
-def plt_scatter_war(ds):
+def plt_scatter_war(ds, v):
     """
     Plot scatter plot of obs_bau and obs_change values for each reported conflict locations
     """
@@ -306,19 +306,35 @@ def plt_scatter_war(ds):
     clrs = ["#1b9e77", "#d95f02", "#7570b3", "#e7298a", "#66a61e", "#e6ab02", "#666666"]
     plt = {e: clr for e, clr in zip(EVENTS, clrs)}
     city_dfs = cal_change_war_point(ds)
-    xc, yc, hc = "OBS_BAU - 2022 (%)", "OBS_CHANGE - 2022-2019 (%)", "Event type"
-    for i, city in enumerate(city_dfs.keys()):
-        print(city)
-        df = city_dfs[city]
+    list_dfs = []
 
+    xc, yc, hc = "OBS_BAU - 2022 (%)", "OBS_CHANGE - 2022-2019 (%)", "Event type"
+
+    for i, city in enumerate(city_dfs.keys()):
+        df = city_dfs[city]
         df.columns = [xc, yc, hc]
-        p = sns.jointplot(df, x=xc, y=yc, hue=hc, palette=plt)
-        p.fig.suptitle(f"({index[i]}) {city} (n={len(df)})", size=20)
-        p.ax_joint.axhline(y=0, color="blue", linestyle="--")
-        p.ax_joint.axvline(x=0, color="blue", linestyle="--")
-        p.ax_joint.set_xlim(-200, 800)
-        p.ax_joint.set_ylim(-400, 600)
-        p.ax_joint.legend(loc="lower right")
+        list_dfs.append(df)
+    war_cities = pd.concat(list_dfs, ignore_index=True)
+
+    p = sns.jointplot(
+        war_cities,
+        x=xc,
+        y=yc,
+        kind="hex",
+        joint_kws=dict(bins="log"),
+    )
+
+    p.fig.suptitle(f"{v} (n={len(war_cities)})", size=15)
+    p.ax_joint.axhline(y=0, color="red", linestyle="--")
+    p.ax_joint.axvline(x=0, color="red", linestyle="--")
+    p.ax_joint.set_xlim(-200, 700)
+    p.ax_joint.set_ylim(-400, 600)
+
+    for patch in p.ax_marg_x.patches:
+        patch.set_facecolor("#d95f02")
+
+    for patch in p.ax_marg_y.patches:
+        patch.set_facecolor("#41b6c4")
     return city_dfs
 
 

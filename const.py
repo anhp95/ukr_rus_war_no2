@@ -13,6 +13,7 @@ ADM1_COL = "ADM1_EN"
 ADM2_COL = "ADM2_EN"
 ADM3_COL = "ADM3_EN"
 PPL_NAME_COL = "name"
+CHECKPOINT_COL = "Name_ENG"
 
 EVENT_COL = "SUB_EVENT_TYPE"
 EVENTS = [
@@ -39,21 +40,29 @@ ADM2_DICT_CITIES = {
 }
 ADM2_CITIES = ADM2_DICT_CITIES.keys()
 WAR_ADMS = ["Dnipropetrovska", "Donetska", "Kharkivska", "Luhanska", "Zaporizka"]
-BOR_DICT_CITIES = {
-    "Chernivetskyi": {"min": 0, "max": 60},
-    "Uzhhorodskyi": {"min": 0, "max": 60},
-    "Berehivskyi": {"min": 0, "max": 60},
+BOR_DICT_PROV = {
+    "Volynska": {"min": 0, "max": 100},
+    "Lvivska": {"min": 0, "max": 100},
+    "Zakarpatska": {"min": 0, "max": 100},
+    "Chernivetska": {"min": 0, "max": 100},
+    "Vinnytska": {"min": 0, "max": 100},
+    "Odeska": {"min": 0, "max": 100},
 }
+LIST_PROV = BOR_DICT_PROV.keys()
 
 DICT_PPLS = {
     "Zaporizhia TPP": {"min": 0, "max": 80},
     "Mironivskaya TEC": {"min": 0, "max": 100},
     # "Zmiivska power station": {"min": 0, "max": 100},
     "Luhanska": {"min": 0, "max": 100},
-    "Sievierodonetsk CHP power station": {"min": 0, "max": 150},
+    "Sievierodonetsk CHP power station": {"min": 0, "max": 100},
     # "Vuglegirska power station",
 }
 LIST_PPLS = DICT_PPLS.keys()
+
+
+LIST_CPS = ["Porubne - Siret", "Luzhanka - Beregsurány", "Uzhhorod - Vyšné Nemecké"]
+DICT_CPS = {cp: {"min": 0, "max": 60} for cp in LIST_CPS}
 
 LCKDWN_SD = "2020-04-06"
 LCKDWN_ED = "2020-05-12"

@@ -266,17 +266,20 @@ class Deweather(object):
 
         b1 = gpd.read_file(UK_SHP_ADM1)
         b2 = gpd.read_file(UK_SHP_ADM2)
-        b3 = gpd.read_file(UK_SHP_ADM3)
+
         ppl_b = gpd.read_file(UK_COAL_SHP)
+        border_b = gpd.read_file(CHECKPOINT_SHP)
+        border_b["geometry"] = border_b.geometry.buffer(0.2, cap_style=3)
         crs = b2.crs
 
         list_adm2 = b2[ADM2_COL].values
         list_ppl = ppl_b[PPL_NAME_COL].values
 
-        self.ds_war = clip(self.dw_ds, b1, crs, WAR_ADMS, ADM1_COL)
-        self.ds_adm2 = clip(self.dw_ds, b2, crs, list_adm2, ADM2_COL)
-        # self.ds_adm3 = clip(self.dw_ds, b3, crs, ADM3_CITIES, ADM3_COL)
-        self.ds_ppl = clip(self.dw_ds, ppl_b, crs, list_ppl, PPL_NAME_COL)
+        # self.ds_war = clip(self.dw_ds, b1, crs, WAR_ADMS, ADM1_COL)
+        # self.ds_adm2 = clip(self.dw_ds, b2, crs, list_adm2, ADM2_COL)
+        # self.ds_ppl = clip(self.dw_ds, ppl_b, crs, list_ppl, PPL_NAME_COL)
+
+        # self.ds_cp = clip(self.dw_ds, b1, crs, LIST_PROV, ADM1_COL)
 
 
 def met_norm(s5p_alg):
@@ -290,18 +293,21 @@ if __name__ == "__main__":
     dsv1 = met_norm(1)
     dsv2 = met_norm(2)
 
-    all_ppl = gpd.read_file(UK_COAL_SHP)[PPL_NAME_COL].values
     # plt single alg
     # plt_line_ts_adm(dsv1.ds_ppl, all_ppl)
     # plt_line_ts_adm(dsv1.ds_adm2, BOR_ADMS)
     # plt_line_ts_adm(dsv1.ds_adm2, ADM2_CITIES)
-    bounds_v1, _ = cal_change_covid(dsv1)
-    bounds_v2, _ = cal_change_covid(dsv2)
+    # bounds_v1, _ = cal_change_covid(dsv1)
+    # bounds_v2, _ = cal_change_covid(dsv2)
 
     # plt_scatter_map_covid_2alg(bounds_v1, bounds_v2)
-    plt_line_ts_adm_2alg(dsv1.ds_ppl, dsv2.ds_ppl, DICT_PPLS)
-    plt_line_ts_adm_2alg(dsv1.ds_adm2, dsv2.ds_adm2, ADM2_DICT_CITIES)
-    plt_line_ts_adm_2alg(dsv1.ds_adm2, dsv2.ds_adm2, ADM2_DICT_CITIES)
+    # plt_line_ts_adm_2alg(dsv1.ds_ppl, dsv2.ds_ppl, DICT_PPLS)
+    # plt_line_ts_adm_2alg(dsv1.ds_adm2, dsv2.ds_adm2, ADM2_DICT_CITIES)
+
+    # plot checkpoint
+    # plt_line_ts_adm_2alg(dsv1.ds_cp, dsv2.ds_cp, BOR_DICT_PROV)
+    plt_scatter_war(dsv1)
+    plt_scatter_war(dsv2)
 
 
 # %%

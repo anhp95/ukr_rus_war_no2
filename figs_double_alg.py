@@ -95,8 +95,8 @@ def plt_line_ts_adm_2alg(ds_1, ds_2, dict_city):
         axes = subfigs[i].subplots(1, ncs, sharey=True)
         for j, (ds, v) in enumerate(zip([ds_1, ds_2], S5P_VERSIONS)):
             df_city = ds[city].mean(["lat", "lon"], skipna=True).to_dataframe()
-            for k, y in enumerate([2020, 2022]):
-                df = get_nday_mean(df_city[f"{y}-02-01":f"{y}-07-25"], 7)
+            for k, y in enumerate([2021, 2022]):
+                df = get_nday_mean(df_city[f"{y}-02-15":f"{y}-05-31"], 3)
                 ax = axes[2 * j + k]
                 sns.lineplot(
                     df,
@@ -155,40 +155,3 @@ def plt_line_ts_adm_2alg(ds_1, ds_2, dict_city):
                     )
                 except:
                     pass
-
-
-def test():
-    def example_plot(ax, fontsize=12, hide_labels=False):
-        pc = ax.pcolormesh(np.random.randn(30, 30), vmin=-2.5, vmax=2.5)
-        if not hide_labels:
-            ax.set_xlabel("x-label", fontsize=fontsize)
-            ax.set_ylabel("y-label", fontsize=fontsize)
-            ax.set_title("Title", fontsize=fontsize)
-        return pc
-
-    np.random.seed(19680808)
-    # gridspec inside gridspec
-    fig = plt.figure(layout="constrained", figsize=(10, 4))
-    subfigs = fig.subfigures(1, 2, wspace=0.07)
-
-    axsLeft = subfigs[0].subplots(1, 2, sharey=True)
-    subfigs[0].set_facecolor("0.75")
-
-    for ax in axsLeft:
-        pc = example_plot(ax)
-    subfigs[0].suptitle("Left plots", fontsize="x-large")
-    subfigs[0].colorbar(pc, shrink=0.6, ax=axsLeft, location="bottom")
-
-    axsRight = subfigs[1].subplots(3, 1, sharex=True)
-    for nn, ax in enumerate(axsRight):
-        pc = example_plot(ax, hide_labels=True)
-        if nn == 2:
-            ax.set_xlabel("xlabel")
-        if nn == 1:
-            ax.set_ylabel("ylabel")
-
-    subfigs[1].set_facecolor("0.85")
-    subfigs[1].colorbar(pc, shrink=0.6, ax=axsRight)
-    subfigs[1].suptitle("Right plots", fontsize="x-large")
-
-    fig.suptitle("Figure suptitle", fontsize="xx-large")

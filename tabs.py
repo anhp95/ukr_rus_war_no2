@@ -60,27 +60,29 @@ def cal_change_war_point(ds):
             sd = 24 if m == 2 else 1
             for d in range(sd, ed):
                 d22, d19 = f"2022-{m}-{d}", f"2019-{m}-{d}"
+                try:
+                    ds22 = ds.dw_ds.sel(time=d22)
+                    ds19 = ds.dw_ds.sel(time=d19)
+                    ob = write_crs(ds22[OBS_BAU_COL])
 
-                ds22 = ds.dw_ds.sel(time=d22)
-                ds19 = ds.dw_ds.sel(time=d19)
-                ob = write_crs(ds22[OBS_BAU_COL])
+                    os22, os19 = ds22[S5P_OBS_COL], ds19[S5P_OBS_COL]
+                    os_change = write_crs((os22 - os19) * 100 / os19)
 
-                os22, os19 = ds22[S5P_OBS_COL], ds19[S5P_OBS_COL]
-                os_change = write_crs((os22 - os19) * 100 / os19)
-
-                df_d = city_war.loc[city_war["DATETIME"] == d22]
-                ob_dt, os_change_dt = [], []
-                for l in range(len(df_d)):
-                    g = df_d.iloc[[l]].geometry
-                    try:
-                        ob_dt.append(ob.rio.clip(g).mean().item())
-                        os_change_dt.append(os_change.rio.clip(g).mean().item())
-                    except:
-                        ob_dt.append(np.nan)
-                        os_change_dt.append(np.nan)
-                df_d["OBS_BAU"] = ob_dt
-                df_d["OBS_CHANGE"] = os_change_dt
-                dfs.append(df_d)
+                    df_d = city_war.loc[city_war["DATETIME"] == d22]
+                    ob_dt, os_change_dt = [], []
+                    for l in range(len(df_d)):
+                        g = df_d.iloc[[l]].geometry
+                        try:
+                            ob_dt.append(ob.rio.clip(g).mean().item())
+                            os_change_dt.append(os_change.rio.clip(g).mean().item())
+                        except:
+                            ob_dt.append(np.nan)
+                            os_change_dt.append(np.nan)
+                    df_d["OBS_BAU"] = ob_dt
+                    df_d["OBS_CHANGE"] = os_change_dt
+                    dfs.append(df_d)
+                except:
+                    pass
 
         fdf = pd.concat(dfs, ignore_index=True)
         fdf = fdf.dropna(subset=["OBS_BAU", "OBS_CHANGE"])
