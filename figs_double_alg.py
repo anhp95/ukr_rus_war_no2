@@ -18,16 +18,32 @@ from tabs import *
 S5P_VERSIONS = ["S5P_v1.x", "S5P_v2.4"]
 
 
-def compare_obs_bau(ds1, ds2, months=[3, 4, 5, 6]):
-    var = "OBS_BAU"
+def compare_obs_bau(ds1, ds2, mode="war"):
     bau_var = "BAU_S5P"
     obs_var = "OBS_S5P"
     list_ds = [ds1, ds2]
     list_var = [obs_var, bau_var]
-    for i, ds in enumerate(zip(ds1, ds2)):
-        for j, var in enumerate(zip(list_var)):
-            bau_ds = ds[bau_var]
-    pass
+
+    months_covid = [4, 5]
+    months_war = [3, 4, 5, 6]
+
+    months = months_war if mode == "war" else months_covid
+
+    year = 2022 if mode == "war" else 2020
+
+    nrs, ncs = 2, 2
+    w, h = 5 * ncs, 5 * nrs
+    fig, axes = plt.subplots(nrs, ncs, figsize=(w, h), layout="constrained")
+
+    for i, (ds, ver) in enumerate(zip(list_ds, S5P_VERSIONS)):
+        for j, var in enumerate(list_var):
+            ax = axes[i, j]
+            ds_var = ds.dw_ds[var]
+            ds_var = ds_var.sel(time=ds_var.time.dt.year == year)
+            sel_ds = ds_var.sel(time=ds_var.time.dt.month.isin(months)).mean("time")
+
+            sel_ds.plot(cmap="OrRd", ax=ax, vmin=5, vmax=60)
+            ax.set_title(f"{ver} {var} {mode}")
 
 
 def plt_scatter_map_covid_2alg(df_1, df_2):
