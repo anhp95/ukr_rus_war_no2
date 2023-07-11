@@ -28,6 +28,7 @@ def compare_obs_bau(ds1, ds2, mode="war"):
     months_war = [3, 4, 5, 6]
 
     months = months_war if mode == "war" else months_covid
+    b2 = gpd.read_file(UK_SHP_ADM1)
 
     year = 2022 if mode == "war" else 2020
 
@@ -39,11 +40,31 @@ def compare_obs_bau(ds1, ds2, mode="war"):
         for j, var in enumerate(list_var):
             ax = axes[i, j]
             ds_var = ds.dw_ds[var]
+
             ds_var = ds_var.sel(time=ds_var.time.dt.year == year)
             sel_ds = ds_var.sel(time=ds_var.time.dt.month.isin(months)).mean("time")
 
-            sel_ds.plot(cmap="OrRd", ax=ax, vmin=5, vmax=60)
+            cb_mean = sel_ds.plot(cmap="OrRd", ax=ax, vmin=5, vmax=60)
+            # b2.plot(ax=ax, facecolor="None", edgecolor="black", lw=0.2)
+
             ax.set_title(f"{ver} {var} {mode}")
+            ax.set_xticks([])
+            ax.set_xticklabels([])
+            ax.set_yticks([])
+            ax.set_yticklabels([])
+            ax.set_ylabel("")
+            ax.set_xlabel("")
+            cb_mean.colorbar.remove()
+
+    cb_mean = fig.colorbar(
+        cb_mean,
+        ax=axes,
+        shrink=0.4,
+        extend="both",
+        location="bottom",
+    )
+    cb_mean.set_label(NO2_UNIT, size=15)
+    cb_mean.ax.tick_params(labelsize=15)
 
 
 def plt_scatter_map_covid_2alg(df_1, df_2):
