@@ -18,6 +18,18 @@ from tabs import *
 S5P_VERSIONS = ["S5P_v1.x", "S5P_v2.4"]
 
 
+def compare_obs_bau(ds1, ds2, months=[3, 4, 5, 6]):
+    var = "OBS_BAU"
+    bau_var = "BAU_S5P"
+    obs_var = "OBS_S5P"
+    list_ds = [ds1, ds2]
+    list_var = [obs_var, bau_var]
+    for i, ds in enumerate(zip(ds1, ds2)):
+        for j, var in enumerate(zip(list_var)):
+            bau_ds = ds[bau_var]
+    pass
+
+
 def plt_scatter_map_covid_2alg(df_1, df_2):
     nrs, ncs = 2, 2
     w, h = 5 * ncs, 4 * nrs

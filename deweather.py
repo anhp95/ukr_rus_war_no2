@@ -306,8 +306,8 @@ if __name__ == "__main__":
 
     # plot checkpoint
     # plt_line_ts_adm_2alg(dsv1.ds_cp, dsv2.ds_cp, BOR_DICT_PROV)
-    plt_scatter_war(dsv1)
-    plt_scatter_war(dsv2)
-
+#     plt_scatter_war(dsv1)
+#     plt_scatter_war(dsv2)
+# 1
 
 # %%
