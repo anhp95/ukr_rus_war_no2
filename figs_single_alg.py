@@ -9,9 +9,15 @@ import matplotlib.cm as cm
 import metpy.calc as mpcalc
 import windrose
 import matplotlib.dates as mdates
+import matplotlib.lines as mlines
+import datashader as dsh
 
 from metpy.units import units
 from calendar import monthrange
+
+from datashader.mpl_ext import dsshow
+from sklearn.metrics import r2_score
+from scipy import stats
 
 from utils import *
 from const import *
@@ -404,3 +410,56 @@ def plt_adm2_map_war(df_change):
             )
             b2.plot(ax=ax, facecolor="None", edgecolor="black", lw=0.05)
             ax.set_title(f"{t[j]} ({calendar.month_name[m]})", fontsize=15)
+
+
+def plot_pred_true(ds, s5p_ver):
+    figure, axis = plt.subplots(1, 2, figsize=(13, 5))
+    figure.tight_layout(pad=7.0)
+    ds.test_2019.groupby("time").mean().mul(1e6)[[S5P_OBS_COL, S5P_PRED_COL]].plot.line(
+        ax=axis[0]
+    )
+
+    dsartist = dsshow(
+        ds.test_2019[[S5P_OBS_COL, S5P_PRED_COL]].mul(1e6),
+        dsh.Point(S5P_OBS_COL, S5P_PRED_COL),
+        dsh.count(),
+        norm="linear",
+        aspect="auto",
+        ax=axis[1],
+    )
+
+    plt.colorbar(dsartist)
+
+    axis[0].set_title(
+        rf"a{s5p_ver}) Time series trend of OBS NO$_{2}$ and BAU NO$_{2}$"
+    )
+    axis[0].set_xlabel("Time")
+    axis[0].set_ylabel(f"$10^{{{-6}}}$ $mol/m^2$")
+
+    axis[1].set_title(rf"b{s5p_ver}) Scatter Plot of OBS NO$_{2}$ and BAU NO$_{2}$")
+    axis[1].set_xlabel(r"OBS NO$_{2}$ ($10^{{{-6}}}$ $mol/m^2$)")
+    axis[1].set_ylabel(r"BAU NO$_{2}$ ($10^{{{-6}}}$ $mol/m^2$)")
+
+    start_x = 370 if s5p_ver == 1 else 470
+    gap = 15 if s5p_ver == 1 else 20
+
+    axis[1].annotate("n = {}".format(len(ds.test_2019[S5P_OBS_COL])), (start_x, 0))
+    axis[1].annotate(
+        "N = {}".format(len(ds.test_2019.groupby(["lat", "lon"]).mean())),
+        (start_x, gap),
+    )
+    axis[1].annotate(
+        "$R$ = {:.2f}".format(
+            stats.pearsonr(ds.test_2019[S5P_OBS_COL], ds.test_2019[S5P_PRED_COL])[0]
+        ),
+        (start_x, gap * 2),
+    )
+
+    line = mlines.Line2D([0, 1], [0, 1], color="red", label="1:1 line")
+    transform = axis[1].transAxes
+    line.set_transform(transform)
+    axis[1].add_line(line)
+    axis[1].legend()
+
+
+# %%

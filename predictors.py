@@ -30,7 +30,7 @@ class Predictor:
         self.group_by_date()
         # self.select_war_time()
         self.interpolate()
-        self.to_nc()
+        # self.to_nc()
 
     def set_years(self):
         return

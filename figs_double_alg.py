@@ -18,53 +18,48 @@ from tabs import *
 S5P_VERSIONS = ["S5P_v1.x", "S5P_v2.4"]
 
 
-def compare_obs_bau(ds1, ds2, mode="war"):
+def compare_obs_bau(ds1, ds2):
     bau_var = "BAU_S5P"
     obs_var = "OBS_S5P"
     list_ds = [ds1, ds2]
     list_var = [obs_var, bau_var]
 
-    months_covid = [4, 5]
-    months_war = [3, 4, 5, 6]
-
-    months = months_war if mode == "war" else months_covid
-    b2 = gpd.read_file(UK_SHP_ADM1)
-
-    year = 2022 if mode == "war" else 2020
+    cmaps = ["YlOrBr", "YlOrBr", "Blues"]
+    sd_s = [BF_SD, LCKDWN_SD]
+    ed_s = [BF_ED, LCKDWN_ED]
+    # tits = ["Prelockdown", "Lockdown"]
 
     nrs, ncs = 2, 2
-    w, h = 5 * ncs, 5 * nrs
-    fig, axes = plt.subplots(nrs, ncs, figsize=(w, h), layout="constrained")
+    w, h = 2 * ncs, 2 * nrs
+    for sd, ed in zip(sd_s, ed_s):
+        fig, axes = plt.subplots(nrs, ncs, figsize=(w, h), layout="constrained")
 
-    for i, (ds, ver) in enumerate(zip(list_ds, S5P_VERSIONS)):
-        for j, var in enumerate(list_var):
-            ax = axes[i, j]
-            ds_var = ds.dw_ds[var]
+        for i, (ds, ver) in enumerate(zip(list_ds, S5P_VERSIONS)):
+            for j, (var, cmap) in enumerate(zip(list_var, cmaps)):
+                ax = axes[i, j]
 
-            ds_var = ds_var.sel(time=ds_var.time.dt.year == year)
-            sel_ds = ds_var.sel(time=ds_var.time.dt.month.isin(months)).mean("time")
+                ds_var = ds.dw_ds[var]
+                sel_ds = ds_var.sel(time=slice(sd, ed)).mean("time")
+                cb_mean = sel_ds.plot(cmap=cmap, ax=ax, vmin=10, vmax=50)
 
-            cb_mean = sel_ds.plot(cmap="OrRd", ax=ax, vmin=5, vmax=60)
-            # b2.plot(ax=ax, facecolor="None", edgecolor="black", lw=0.2)
+                ax.set_title(f"{ver} {var.split('_')[0]}")
+                ax.set_xticks([])
+                ax.set_xticklabels([])
+                ax.set_yticks([])
+                ax.set_yticklabels([])
+                ax.set_ylabel("")
+                ax.set_xlabel("")
+                cb_mean.colorbar.remove()
 
-            ax.set_title(f"{ver} {var} {mode}")
-            ax.set_xticks([])
-            ax.set_xticklabels([])
-            ax.set_yticks([])
-            ax.set_yticklabels([])
-            ax.set_ylabel("")
-            ax.set_xlabel("")
-            cb_mean.colorbar.remove()
-
-    cb_mean = fig.colorbar(
-        cb_mean,
-        ax=axes,
-        shrink=0.4,
-        extend="both",
-        location="bottom",
-    )
-    cb_mean.set_label(NO2_UNIT, size=15)
-    cb_mean.ax.tick_params(labelsize=15)
+        cb_mean = fig.colorbar(
+            cb_mean,
+            ax=axes,
+            shrink=0.4,
+            extend="both",
+            location="bottom",
+        )
+        cb_mean.set_label(NO2_UNIT, size=10)
+        cb_mean.ax.tick_params(labelsize=10)
 
 
 def plt_scatter_map_covid_2alg(df_1, df_2):
@@ -144,8 +139,8 @@ def plt_line_ts_adm_2alg(ds_1, ds_2, dict_city):
         axes = subfigs[i].subplots(1, ncs, sharey=True)
         for j, (ds, v) in enumerate(zip([ds_1, ds_2], S5P_VERSIONS)):
             df_city = ds[city].mean(["lat", "lon"], skipna=True).to_dataframe()
-            for k, y in enumerate([2021, 2022]):
-                df = get_nday_mean(df_city[f"{y}-02-15":f"{y}-05-31"], 3)
+            for k, y in enumerate([2020, 2022]):
+                df = get_nday_mean(df_city[f"{y}-02-01":f"{y}-07-31"], 7)
                 ax = axes[2 * j + k]
                 sns.lineplot(
                     df,
@@ -177,19 +172,33 @@ def plt_line_ts_adm_2alg(ds_1, ds_2, dict_city):
                 if y == 2022:
                     wd = pd.to_datetime(WAR_SD)
                     wl = ax.axvline(x=wd, color="green", linestyle="--")
+
                 ax.grid(visible=True, which="major", color="black", linewidth=0.1)
                 ax.grid(visible=True, which="minor", color="black", linewidth=0.1)
+
                 fmt = mdates.DateFormatter("%b")
                 locator = mdates.MonthLocator()
                 ax.xaxis.set_major_locator(locator)
                 ax.xaxis.set_major_formatter(fmt)
                 ax.set_ylabel(NO2_UNIT)
                 ax.set_ylim(dict_city[city]["min"], dict_city[city]["max"])
-                ax.tick_params(axis="both", which="major", labelsize=11)
-                ax.set_xticklabels(["", "Mar", "", "May", "", "Jul", ""])
+                # ax.tick_params(axis="both", which="major", labelsize=11)
+
                 ax.set_xlabel("")
+                ax.set_xticklabels(["", "Mar", "", "May", "", "Jul", ""])
                 if i != len(list_city) - 1:
-                    ax.set_xticklabels(["", "", "", "", "", "", ""])
+                    for tick in ax.xaxis.get_major_ticks():
+                        tick.tick1line.set_visible(False)
+                        tick.tick2line.set_visible(False)
+                        tick.label1.set_visible(False)
+                        tick.label2.set_visible(False)
+
+                if (2 * j + k) > 0:
+                    for tick in ax.yaxis.get_major_ticks():
+                        tick.tick1line.set_visible(False)
+                        tick.tick2line.set_visible(False)
+                        tick.label1.set_visible(False)
+                        tick.label2.set_visible(False)
                 try:
                     handles, labels = ax.get_legend_handles_labels()
                     handles = handles + [cl] + [wl]
@@ -204,3 +213,23 @@ def plt_line_ts_adm_2alg(ds_1, ds_2, dict_city):
                     )
                 except:
                     pass
+
+
+def plt_feature_importance(ds1, ds2):
+    nrs, ncs = 1, 2
+    w, h = 6 * ncs, 6 * nrs
+    fig, axes = plt.subplots(nrs, ncs, figsize=(w, h), layout="constrained")
+
+    for i, (ds, v) in enumerate(zip([ds1, ds2], S5P_VERSIONS)):
+        df = pd.DataFrame()
+
+        df["Feature importance"] = ds.model.feature_importances_
+        df["Feature name"] = FEATURE_NAMES
+        df = df.sort_values(by=["Feature importance"], ascending=False)
+
+        sns.set_theme(style="whitegrid")
+        ax = axes[i]
+        sns.barplot(
+            data=df, y="Feature name", x="Feature importance", orient="h", ax=ax
+        )
+        ax.set_title(v)

@@ -10,7 +10,7 @@ from utils import *
 from const import *
 
 
-def cal_change_covid(ds):
+def cal_change_covid(ds, mode="covid"):
     bounds, _ = get_bound_pop()
     sel_cols = [ADM2_COL]
     for p in DATE_2020.keys():
@@ -23,7 +23,11 @@ def cal_change_covid(ds):
         sd20, ed20 = DATE_2020[p]
         sd19, ed19 = to_d19(sd20), to_d19(ed20)
 
-        for city in ADM2_CITIES:
+        if mode == "war":
+            sd22, ed22 = sd20.replace("2020", "2022"), ed20.replace("2020", "2022")
+            sd20, ed20 = sd22, ed22
+
+        for city in bounds[ADM2_COL].values:
             city20 = ds.ds_adm2[city].sel(time=slice(sd20, ed20))
             city19 = ds.ds_adm2[city].sel(time=slice(sd19, ed19))
             # obs_bau dif
@@ -180,3 +184,17 @@ def tab_decor_mstd(df, cols, title):
     final = decored_df[cols].round(1)
     final.to_csv(f"./data/result_stats/{title}.csv")
     return final
+
+
+def cal_change_covidtime(dsv1, dsv2):
+    df_cv1, cv_sel_cols1 = cal_change_covid(dsv1)
+    df_war_cvtime1, war_cvtime_sel_cols1 = cal_change_covid(dsv1, mode="war")
+
+    df_cv2, cv_sel_cols2 = cal_change_covid(dsv2)
+    df_war_cvtime2, war_cvtime_sel_cols2 = cal_change_covid(dsv2, mode="war")
+
+    tab_decor_mstd(df_cv1, cv_sel_cols1, "covid_v1")
+    tab_decor_mstd(df_cv2, cv_sel_cols2, "covid_v2")
+
+    tab_decor_mstd(df_war_cvtime1, war_cvtime_sel_cols1, "war_covidtime_v1")
+    tab_decor_mstd(df_war_cvtime2, war_cvtime_sel_cols2, "war_covidtime_v2")

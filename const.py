@@ -53,7 +53,7 @@ LIST_PROV = BOR_DICT_PROV.keys()
 DICT_PPLS = {
     "Zaporizhia TPP": {"min": 0, "max": 80},
     "Mironivskaya TEC": {"min": 0, "max": 100},
-    # "Zmiivska power station": {"min": 0, "max": 100},
+    "Zmiivska power station": {"min": 0, "max": 100},
     "Luhanska": {"min": 0, "max": 100},
     "Sievierodonetsk CHP power station": {"min": 0, "max": 100},
     # "Vuglegirska power station",
@@ -65,7 +65,7 @@ LIST_CPS = ["Porubne - Siret", "Luzhanka - Beregsurány", "Uzhhorod - Vyšné Ne
 DICT_CPS = {cp: {"min": 0, "max": 60} for cp in LIST_CPS}
 
 LCKDWN_SD = "2020-04-06"
-LCKDWN_ED = "2020-05-12"
+LCKDWN_ED = "2020-05-10"
 BF_SD = "2020-03-01"
 BF_ED = "2020-03-15"
 
@@ -110,6 +110,22 @@ ADM3_CITIES = [
     "Simferopolska",
     "Makiivska",
     "Poltavska",
+]
+
+FEATURE_NAMES = [
+    "Surface NO2",
+    "Wind speed (U)",
+    "Wind speed (V)",
+    "Dewpoint temperature",
+    "Temperature",
+    "Boundary layer height",
+    "Geopotential",
+    "Relative humidity",
+    "Population",
+    "Day of week",
+    "Day of year",
+    "Latitude",
+    "Longitude",
 ]
 
 # notes for the data processor version
