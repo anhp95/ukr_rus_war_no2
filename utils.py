@@ -1,4 +1,4 @@
-#%%
+# %%
 
 import xarray as xr
 import rioxarray as rioxr  # conflcict package seaborn conda remove seaborn
@@ -18,7 +18,6 @@ from const import *
 
 
 def get_bound_pop():
-
     city_pop_df = pd.read_csv(CITY_POP)
 
     gdf = gpd.read_file(UK_SHP_ADM2)
@@ -47,19 +46,18 @@ def get_bound(shp_file=UK_SHP_ADM0):
 
 
 def read_tif(tif_file):
-
     rio_ds = rioxr.open_rasterio(tif_file)
     return rio_ds.rename({"x": "lon", "y": "lat"})
 
 
 def read_grib(grib_file):
-
     grib_ds = cfgrib.open_dataset(grib_file)
     return grib_ds.rename({"longitude": "lon", "latitude": "lat"})
 
 
-def prep_s5p_ds():
-    org_ds = xr.open_dataset(S5P_NO2_NC) * 1e6
+def prep_s5p_ds(mode="gee"):
+    nc_file = S5P_NO2_GEE_NC if mode == "gee" else S5P_NO2_RPRO_NC
+    org_ds = xr.open_dataset(nc_file) * 1e6
     var_name = list(org_ds.keys())[0]
     org_ds = org_ds.rename(name_dict={var_name: S5P_OBS_COL})
     org_ds = org_ds.rio.write_crs("epsg:4326", inplace=True)
@@ -74,7 +72,6 @@ def prep_location_df(df):
 
 
 def prep_fire_df():
-
     gdf = prep_location_df(pd.read_csv(FIRE_WARTIME_CSV))
     gdf["DATETIME"] = pd.to_datetime(gdf["DATETIME"], format="%m/%d/%Y")
 
@@ -113,7 +110,7 @@ def get_monthly_conflict():
     list_city = b[ADM2_COL].values
     y = 2022
 
-    for m in range(2, 13):
+    for m in range(2, 8):
         mc = []
         sd = 24 if m == 2 else 1
         _, ed = monthrange(y, m)

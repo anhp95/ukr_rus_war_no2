@@ -18,7 +18,6 @@ CHECKPOINT_COL = "Name_ENG"
 EVENT_COL = "SUB_EVENT_TYPE"
 EVENTS = [
     "Attack",
-    "Abduction/forced disappearance",
     "Air/drone strike",
     "Armed clash",
     "Remote explosive/landmine/IED",
@@ -38,6 +37,15 @@ ADM2_DICT_CITIES = {
     # "Mykolaivskyi",
     # "Sevastopol", # no data
 }
+
+ENG_ADM2_NAMES = {
+    "Kyiv": "Kyiv",
+    "Kharkivskyi": "Kharkiv",
+    "Dniprovskyi": "Dnipro",
+    "Zaporizkyi": "Zaporizhia",
+    "Kryvorizkyi": "Kryvyi Rih",
+}
+
 ADM2_CITIES = ADM2_DICT_CITIES.keys()
 WAR_ADMS = ["Dnipropetrovska", "Donetska", "Kharkivska", "Luhanska", "Zaporizka"]
 BOR_DICT_PROV = {
@@ -58,6 +66,13 @@ DICT_PPLS = {
     "Sievierodonetsk CHP power station": {"min": 0, "max": 100},
     # "Vuglegirska power station",
 }
+ENG_CPP_NAMES = {
+    "Zaporizhia TPP": "Zaporizhia power station",
+    "Mironivskaya TEC": "Mironivskaya power station",
+    "Zmiivska power station": "Zmiivska power station",
+    "Luhanska": "Luhansk power station",
+    "Sievierodonetsk CHP power station": "Sievierodonetsk power station",
+}
 LIST_PPLS = DICT_PPLS.keys()
 
 
@@ -70,8 +85,8 @@ BF_SD = "2020-03-01"
 BF_ED = "2020-03-15"
 
 DATE_2020 = {
-    "Prelockdown": (BF_SD, BF_ED),
-    "Lockdown": (LCKDWN_SD, LCKDWN_ED),
+    "Pre-lockdown (03/01 - 03/15)": (BF_SD, BF_ED),
+    "Lockdown (04/06 - 05/10)": (LCKDWN_SD, LCKDWN_ED),
 }
 
 WAR_SD = "2022-02-24"

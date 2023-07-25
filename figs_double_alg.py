@@ -66,7 +66,7 @@ def plt_scatter_map_covid_2alg(df_1, df_2):
     nrs, ncs = 2, 2
     w, h = 5 * ncs, 4 * nrs
     bound_lv1 = gpd.read_file(UK_SHP_ADM1)
-    index_fig = [["a1", "b1"], ["a2", "b2"]]
+    index_fig = [["1", "2"], ["3", "4"]]
     huem = 35
 
     fig1, axes1 = plt.subplots(nrs, ncs, figsize=(w, h), layout="constrained")
@@ -92,18 +92,31 @@ def plt_scatter_map_covid_2alg(df_1, df_2):
                 )
                 g.set(title=f"({index_fig[i][j]}) {v} - {col} {p}")
                 ax.get_legend().remove()
-                h, l = g.get_legend_handles_labels()
-                l = [f"{li}M" if li != "Population" else li for li in l]
-                legend = ax.legend(
-                    h[-6:],
-                    l[-6:],
-                    bbox_to_anchor=(0, 0),
-                    loc="lower left",
-                    borderaxespad=0.0,
-                    # fontsize=13,
-                    edgecolor="black",
-                )
-                legend.get_frame().set_alpha(None)
+                if i < 1 and j < 1:
+                    x, y, arrow_length = 0.05, 0.95, 0.12
+                    ax.annotate(
+                        "N",
+                        xy=(x, y),
+                        xytext=(x, y - arrow_length),
+                        arrowprops=dict(facecolor="black", width=5, headwidth=12),
+                        ha="center",
+                        va="center",
+                        fontsize=15,
+                        xycoords=ax.transAxes,
+                    )
+
+                    h, l = g.get_legend_handles_labels()
+                    l = [f"{li}M" if li != "Population" else li for li in l]
+                    legend = ax.legend(
+                        h[-6:],
+                        l[-6:],
+                        bbox_to_anchor=(0, 0),
+                        loc="lower left",
+                        borderaxespad=0.0,
+                        # fontsize=13,
+                        edgecolor="black",
+                    )
+                    legend.get_frame().set_alpha(None)
 
                 ax.set_xticks([])
                 ax.set_xticklabels([])
@@ -125,7 +138,7 @@ def plt_scatter_map_covid_2alg(df_1, df_2):
         )
 
 
-def plt_line_ts_adm_2alg(ds_1, ds_2, dict_city):
+def plt_line_ts_adm_2alg(ds_1, ds_2, dict_city, eng_name):
     list_city = dict_city.keys()
     nrs, ncs = len(list_city), 4
     w, h = 2.3 * ncs, 2 * nrs
@@ -135,7 +148,7 @@ def plt_line_ts_adm_2alg(ds_1, ds_2, dict_city):
     subfigs = fig.subfigures(nrs, 1, wspace=0.07)
 
     for i, city in enumerate(list_city):
-        subfigs[i].suptitle(city, fontsize="x-large")
+        subfigs[i].suptitle(eng_name[city], fontsize="x-large")
         axes = subfigs[i].subplots(1, ncs, sharey=True)
         for j, (ds, v) in enumerate(zip([ds_1, ds_2], S5P_VERSIONS)):
             df_city = ds[city].mean(["lat", "lon"], skipna=True).to_dataframe()

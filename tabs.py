@@ -6,8 +6,32 @@ import numpy as np
 import calendar
 import copy
 
+from calendar import monthrange
+
 from utils import *
 from const import *
+
+
+def stats_obs_change(mode="gee"):
+    ds = prep_s5p_ds(mode)
+
+    cv_20 = ds.sel(time=slice(f"2020-04-01", f"2020-05-31"))[S5P_OBS_COL].mean()
+    cv_19 = ds.sel(time=slice(f"2019-04-01", f"2019-05-31"))[S5P_OBS_COL].mean()
+
+    war_22 = ds.sel(time=slice(f"2022-03-01", f"2022-07-31"))[S5P_OBS_COL].mean()
+    war_21 = ds.sel(time=slice(f"2021-03-01", f"2021-07-31"))[S5P_OBS_COL].mean()
+    war_19 = ds.sel(time=slice(f"2019-03-01", f"2019-07-31"))[S5P_OBS_COL].mean()
+
+    cv_chg_20_19 = (cv_20 - cv_19) * 100 / cv_19
+
+    war_chg_22_21 = (war_22 - war_21) * 100 / war_21
+    war_chg_22_19 = (war_22 - war_19) * 100 / war_19
+
+    return {
+        "covid_20_19": cv_chg_20_19.item(),
+        "war_chg_22_21": war_chg_22_21.item(),
+        "war_chg_22_19": war_chg_22_19.item(),
+    }
 
 
 def cal_change_covid(ds, mode="covid"):
@@ -116,8 +140,8 @@ def cal_change_war(ds):
     list_city = cf[ADM2_COL].values
     sel_cols = [ADM2_COL]
     # extr data to plot
-    for y in [2020, 2021, 2022]:
-        for m in range(2, 13):
+    for y in [2022]:
+        for m in range(2, 8):
             obs_bau_m, obs_bau_std = [], []
             obs_dif_m, obs_dif_std = [], []
 
@@ -157,13 +181,15 @@ def cal_change_war(ds):
 def tab4_decor(df_org):
     df = copy.deepcopy(df_org)
     cols = ["OBS_BAU", "OBS_CHANGE"]
-    df = df.loc[df[ADM2_COL].isin(ADM2_CITIES)]
+    bounds, _ = get_bound_pop()
+
+    df = df.loc[df[ADM2_COL].isin(bounds[ADM2_COL].values)]
     sel_cols = [ADM2_COL]
     for col in cols:
-        for y in [2020, 2021, 2022]:
+        for y in [2022]:
             col_m, col_std = f"{col}_{y}", f"{col}_{y}_std"
-            df[col_m] = df[[f"{col}_{m}_{y}" for m in range(2, 13)]].mean(axis=1)
-            df[col_std] = df[[f"{col}_{m}_std_{y}" for m in range(2, 13)]].mean(axis=1)
+            df[col_m] = df[[f"{col}_{m}_{y}" for m in range(2, 8)]].mean(axis=1)
+            df[col_std] = df[[f"{col}_{m}_std_{y}" for m in range(2, 8)]].mean(axis=1)
             sel_cols = sel_cols + [col_m]
 
     return df.round(1), sel_cols

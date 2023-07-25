@@ -79,7 +79,7 @@ class Deweather(object):
         self.extract_list_geo()
 
         self.build_model()
-        # self.eval_model()
+        self.eval_model()
 
         self.deweather()
         self.clip_to_amd_and_ppl()
@@ -304,13 +304,21 @@ if __name__ == "__main__":
 # bounds_v2, _ = cal_change_covid(dsv2)
 
 # plt_scatter_map_covid_2alg(bounds_v1, bounds_v2)
-# plt_line_ts_adm_2alg(dsv1.ds_ppl, dsv2.ds_ppl, DICT_PPLS)
-# plt_line_ts_adm_2alg(dsv1.ds_adm2, dsv2.ds_adm2, ADM2_DICT_CITIES)
+# plt_line_ts_adm_2alg(dsv1.ds_ppl, dsv2.ds_ppl, DICT_PPLS, ENG_CPP_NAMES)
+# plt_line_ts_adm_2alg(dsv1.ds_adm2, dsv2.ds_adm2, ADM2_DICT_CITIES, ENG_ADM2_NAMES)
 
 # plot checkpoint
 # plt_line_ts_adm_2alg(dsv1.ds_cp, dsv2.ds_cp, BOR_DICT_PROV)
 #     plt_scatter_war(dsv1)
 #     plt_scatter_war(dsv2)
 # 1
+
+# cal war stats
+# war1, _ = cal_change_war(dsv1)
+# war2, _ = cal_change_war(dsv2)
+# war41, war41_cs = tab4_decor(war1)
+# war42, war42_cs = tab4_decor(war2)
+# tab_decor_mstd(war41, war41_cs, "war_org")
+# tab_decor_mstd(war42, war42_cs, "war_rpro")
 
 # %%

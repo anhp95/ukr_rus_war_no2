@@ -138,46 +138,52 @@ def plt_line_ts_adm(ds, list_city):
     )
 
 
-def plot_obs_year():
-    org_ds = prep_s5p_ds()
+def plot_obs_year(mode="gee"):
+    # mode: gee or rpro
+    org_ds = prep_s5p_ds(mode)
     bound_lv1 = gpd.read_file(UK_SHP_ADM1)
     years = [2019, 2020, 2021, 2022]
-    nrs, ncs = 4, 12
+    nrs, ncs = 4, 6
     w, h = 4 * ncs, 4 * nrs
     fig_obs, ax_obs = plt.subplots(nrs, ncs, figsize=(w, h), layout="constrained")
     fig_count, ax_count = plt.subplots(nrs, ncs, figsize=(w, h), layout="constrained")
 
     for i, y in enumerate(years):
-        for m in range(1, 13):
+        for m in range(2, 8):
             _, ed = monthrange(y, m)
 
             s5p_no2_year = org_ds.sel(time=org_ds.time.dt.year.isin([y]))
             s5p_month = s5p_no2_year.sel(time=slice(f"{y}-{m}-01", f"{y}-{m}-{ed}"))
-            s5p_month = s5p_month[S5P_OBS_COL][:, 0, :, :]
+            s5p_month = (
+                s5p_month[S5P_OBS_COL][:, 0, :, :]
+                if mode == "gee"
+                else s5p_month[S5P_OBS_COL]
+            )
             s5p_mean = s5p_month.mean("time")
 
             s5p_count = s5p_month.notnull().sum("time")
             s5p_count = s5p_count.where(s5p_count > 0)
 
+            j = m - 2
             cb_mean = s5p_mean.plot(
                 cmap="YlOrRd",
                 vmin=10,
                 vmax=100,
-                ax=ax_obs[i, m - 1],
+                ax=ax_obs[i, j],
             )
             cb_mean.colorbar.remove()
 
             cb_count = s5p_count.plot(
                 vmin=1,
                 vmax=30,
-                ax=ax_count[i, m - 1],
+                ax=ax_count[i, j],
             )
             cb_count.colorbar.remove()
 
             for axi in [ax_obs, ax_count]:
-                axi[i, m - 1].set_title(f"{y}- {calendar.month_name[m]}", fontsize=30)
-                axi[i, m - 1].set_ylabel("")
-                axi[i, m - 1].set_xlabel("")
+                axi[i, j].set_title(f"{y}- {calendar.month_name[m]}", fontsize=30)
+                axi[i, j].set_ylabel("")
+                axi[i, j].set_xlabel("")
 
     cb_count = fig_count.colorbar(
         cb_count,
@@ -253,6 +259,7 @@ def plt_met_dist(ds, var="blh"):
         axes.set_title(f"{p}", fontsize=15)
         axes.set_xlabel(var_label_dict[var])
         axes.set_ylabel(ylabel)
+        axes.set_ylim(0.0, 20)
         axes.legend(loc="upper right")
 
 
@@ -264,7 +271,7 @@ def plt_wind_rose(ds, year):
     u10, v10 = ds.era5[u10_var], ds.era5[v10_var]
     ds.era5[wind_var] = np.sqrt(u10**2 + v10**2)
     nrs, ncs = 1, 2
-    fig = plt.figure(figsize=(nrs * 10, ncs * 10), constrained_layout=True)
+    fig = plt.figure(figsize=(nrs * 8, ncs * 8), constrained_layout=True)
 
     for i, p in enumerate(DATE_2020.keys()):
         sd, ed = DATE_2020[p]
@@ -298,7 +305,8 @@ def plt_wind_rose(ds, year):
         )
         ax.contour(wind_d.magnitude, wf, normed=True, bins=bins, colors="black")
         ax.set_legend(title="Windspeed: m/s")
-        ax.set_title(f"{year} - {p}", fontsize=15)
+        t = p.split(" ")[0]
+        ax.set_title(f"{year} - {t}", fontsize=17)
 
     return wind_d, wf
 
@@ -354,7 +362,7 @@ def plt_war_fire():
     fire_df = gpd.clip(fire_df, b0.geometry)
 
     moi = [4, 5, 6, 7]
-    moi = [i for i in range(1, 13)]
+    # moi = [i for i in range(1, 13)]
     nrs, ncs = len(moi), 3
     w, h = 5.5 * ncs, 4 * nrs
     fig, axes = plt.subplots(nrs, ncs, figsize=(w, h), layout="constrained")
@@ -374,7 +382,7 @@ def plt_war_fire():
         cf_m = cf_df[cf_df["DATETIME"].dt.month == m]
         cf_m.plot(ax=axes[j, 2], color="orange", markersize=2)
         axes[j, 2].set_title(
-            f"Conflict Spots ({y} - {calendar.month_name[m]})", size=20
+            f"Conflict Hotspots ({y} - {calendar.month_name[m]})", size=20
         )
 
 
@@ -440,7 +448,7 @@ def plot_pred_true(ds, s5p_ver):
     axis[1].set_xlabel(r"OBS NO$_{2}$ ($10^{{{-6}}}$ $mol/m^2$)")
     axis[1].set_ylabel(r"BAU NO$_{2}$ ($10^{{{-6}}}$ $mol/m^2$)")
 
-    start_x = 370 if s5p_ver == 1 else 470
+    start_x = 370 if s5p_ver == 1 else 500
     gap = 15 if s5p_ver == 1 else 20
 
     axis[1].annotate("n = {}".format(len(ds.test_2019[S5P_OBS_COL])), (start_x, 0))
