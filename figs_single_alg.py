@@ -184,6 +184,10 @@ def plot_obs_year(mode="gee", fig_name=None):
                 axi[i, j].set_title(f"{y}- {calendar.month_name[m]}", fontsize=30)
                 axi[i, j].set_ylabel("")
                 axi[i, j].set_xlabel("")
+                axi[i, j].set_xticks([])
+                axi[i, j].set_xticklabels([])
+                axi[i, j].set_yticks([])
+                axi[i, j].set_yticklabels([])
 
     cb_count = fig_count.colorbar(
         cb_count,
@@ -416,7 +420,6 @@ def plt_war_fire(fig_name=None):
                 f"Fire Spots ({y} - {calendar.month_name[m]})", size=20
             )
             b1.plot(ax=axes[i, j], facecolor="None", edgecolor="black", lw=0.2)
-            axes[i, j].grid(False)
 
     for j, m in enumerate(ms):
         cf_m = cf_df[cf_df["DATETIME"].dt.month == m]
@@ -425,7 +428,15 @@ def plt_war_fire(fig_name=None):
             f"Conflict Hotspots ({y} - {calendar.month_name[m]})", size=20
         )
         b1.plot(ax=axes[j, 2], facecolor="None", edgecolor="black", lw=0.2)
-        axes[j, 2].grid(False)
+    for i in range(len(moi)):
+        for j in range(3):
+            axes[i, j].grid(False)
+            axes[i, j].set_xticks([])
+            axes[i, j].set_xticklabels([])
+            axes[i, j].set_yticks([])
+            axes[i, j].set_yticklabels([])
+            axes[i, j].set_ylabel("")
+            axes[i, j].set_xlabel("")
     if fig_name:
         path_ = f"figures/{fig_name}.tiff"
         fig.savefig(
