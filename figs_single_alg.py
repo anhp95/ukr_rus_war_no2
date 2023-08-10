@@ -138,7 +138,7 @@ def plt_line_ts_adm(ds, list_city):
     )
 
 
-def plot_obs_year(mode="gee"):
+def plot_obs_year(mode="gee", fig_name=None):
     # mode: gee or rpro
     org_ds = prep_s5p_ds(mode)
     bound_lv1 = gpd.read_file(UK_SHP_ADM1)
@@ -204,9 +204,23 @@ def plot_obs_year(mode="gee"):
     )
     cb_mean.set_label(NO2_UNIT, size=30)
     cb_mean.ax.tick_params(labelsize=30)
+    if fig_name:
+        path_ = f"figures/{fig_name}.tiff"
+        fig_obs.savefig(
+            path_.replace(".tiff", "_obs.tiff"),
+            format="tiff",
+            dpi=300,
+            bbox_inches="tight",
+        )
+        fig_count.savefig(
+            path_.replace(".tiff", "_count.tiff"),
+            format="tiff",
+            dpi=300,
+            bbox_inches="tight",
+        )
 
 
-def plt_met_dist(ds, var="blh"):
+def plt_met_dist(ds, var="blh", fig_name=None):
     u10 = ds.era5["u10"]
     v10 = ds.era5["v10"]
     ds.era5["wind"] = np.sqrt(u10**2 + v10**2)
@@ -216,12 +230,13 @@ def plt_met_dist(ds, var="blh"):
         "blh": "Boundary layer height (m)",
     }
     ylabel = "Relative Frequency (%)"
+    fis = ["a", "b"]
     # var = "blh"
 
-    for i, p in enumerate(DATE_2020.keys()):
+    for i, (p, fi) in enumerate(zip(DATE_2020.keys(), fis)):
         nrs, ncs = 1, 1
         w, h = 5 * ncs, 4 * nrs
-        figure, axes = plt.subplots(nrs, ncs, figsize=(w, h), layout="constrained")
+        fig, axes = plt.subplots(nrs, ncs, figsize=(w, h), layout="constrained")
 
         sd20, ed20 = DATE_2020[p]
         sd19, ed19 = to_d19(sd20), to_d19(ed20)
@@ -256,14 +271,23 @@ def plt_met_dist(ds, var="blh"):
             label=f"2019",
         )
         axes.legend()
-        axes.set_title(f"{p}", fontsize=15)
+        axes.set_title(p.replace("n (", "n\n("), fontsize=15)
         axes.set_xlabel(var_label_dict[var])
         axes.set_ylabel(ylabel)
         axes.set_ylim(0.0, 20)
         axes.legend(loc="upper right")
+        axes.grid(False)
+        if fig_name:
+            path_ = f"figures/{fig_name}_{fi}.tiff"
+            fig.savefig(
+                path_,
+                format="tiff",
+                dpi=300,
+                bbox_inches="tight",
+            )
 
 
-def plt_wind_rose(ds, year):
+def plt_wind_rose(ds, year, fig_name=None):
     wind_var, u10_var, v10_var = "wind", "u10", "v10"
 
     bins = [i for i in range(0, 7)]
@@ -305,13 +329,20 @@ def plt_wind_rose(ds, year):
         )
         ax.contour(wind_d.magnitude, wf, normed=True, bins=bins, colors="black")
         ax.set_legend(title="Windspeed: m/s")
-        t = p.split(" ")[0]
-        ax.set_title(f"{year} - {t}", fontsize=17)
+        ax.set_title(f"{year} \n {p}", fontsize=17)
+        if fig_name:
+            path_ = f"figures/{fig_name}_{year}.tiff"
+            fig.savefig(
+                path_,
+                format="tiff",
+                dpi=300,
+                bbox_inches="tight",
+            )
 
     return wind_d, wf
 
 
-def plt_scatter_war(ds, v):
+def plt_scatter_war(ds, v, fig_name=None):
     """
     Plot scatter plot of obs_bau and obs_change values for each reported conflict locations
     """
@@ -343,16 +374,25 @@ def plt_scatter_war(ds, v):
     p.ax_joint.axvline(x=0, color="red", linestyle="--")
     p.ax_joint.set_xlim(-200, 700)
     p.ax_joint.set_ylim(-400, 600)
+    p.ax_joint.grid(False)
 
     for patch in p.ax_marg_x.patches:
         patch.set_facecolor("#d95f02")
 
     for patch in p.ax_marg_y.patches:
         patch.set_facecolor("#41b6c4")
+    if fig_name:
+        path_ = f"figures/{fig_name}_{v}.tiff"
+        p.savefig(
+            path_,
+            format="tiff",
+            dpi=300,
+            bbox_inches="tight",
+        )
     return city_dfs
 
 
-def plt_war_fire():
+def plt_war_fire(fig_name=None):
     cf_df = prep_conflict_df()
     fire_df = prep_fire_df()
 
@@ -370,19 +410,29 @@ def plt_war_fire():
     for j, y in enumerate(ys):
         fire_y = fire_df[fire_df["DATETIME"].dt.year == y]
         for i, m in enumerate(ms):
-            b1.plot(ax=axes[i, j], facecolor="None", edgecolor="black", lw=0.2)
             fire_m = fire_y[fire_y["DATETIME"].dt.month == m]
             fire_m.plot(ax=axes[i, j], color="red", markersize=2)
             axes[i, j].set_title(
                 f"Fire Spots ({y} - {calendar.month_name[m]})", size=20
             )
+            b1.plot(ax=axes[i, j], facecolor="None", edgecolor="black", lw=0.2)
+            axes[i, j].grid(False)
 
     for j, m in enumerate(ms):
-        b1.plot(ax=axes[j, 2], facecolor="None", edgecolor="black", lw=0.2)
         cf_m = cf_df[cf_df["DATETIME"].dt.month == m]
         cf_m.plot(ax=axes[j, 2], color="orange", markersize=2)
         axes[j, 2].set_title(
             f"Conflict Hotspots ({y} - {calendar.month_name[m]})", size=20
+        )
+        b1.plot(ax=axes[j, 2], facecolor="None", edgecolor="black", lw=0.2)
+        axes[j, 2].grid(False)
+    if fig_name:
+        path_ = f"figures/{fig_name}.tiff"
+        fig.savefig(
+            path_,
+            format="tiff",
+            dpi=300,
+            bbox_inches="tight",
         )
 
 
@@ -420,9 +470,13 @@ def plt_adm2_map_war(df_change):
             ax.set_title(f"{t[j]} ({calendar.month_name[m]})", fontsize=15)
 
 
-def plot_pred_true(ds, s5p_ver):
-    figure, axis = plt.subplots(1, 2, figsize=(13, 5))
-    figure.tight_layout(pad=7.0)
+def plot_pred_true(ds, s5p_ver, fig_name=None):
+    stats = {
+        1: {"R": 0.80, "N": 1269, "n": 105081},
+        2: {"R": 0.86, "N": 1242, "n": 87894},
+    }
+    fig, axis = plt.subplots(1, 2, figsize=(13, 5))
+    fig.tight_layout(pad=7.0)
     ds.test_2019.groupby("time").mean().mul(1e6)[[S5P_OBS_COL, S5P_PRED_COL]].plot.line(
         ax=axis[0]
     )
@@ -444,23 +498,43 @@ def plot_pred_true(ds, s5p_ver):
     axis[0].set_xlabel("Time")
     axis[0].set_ylabel(f"$10^{{{-6}}}$ $mol/m^2$")
 
+    axis[0].set_ylim(0, 110)
+
+    axis[0].grid(visible=True, which="major", color="black", linewidth=0.1)
+    axis[0].grid(visible=True, which="minor", color="black", linewidth=0.1)
+
+    axis[1].grid(visible=True, which="major", color="black", linewidth=0.1)
+    axis[1].grid(visible=True, which="minor", color="black", linewidth=0.1)
+
+    axis[1].set_ylim(0, 350)
+    axis[1].set_xlim(0, 700)
+
     axis[1].set_title(rf"b{s5p_ver}) Scatter Plot of OBS NO$_{2}$ and BAU NO$_{2}$")
     axis[1].set_xlabel(r"OBS NO$_{2}$ ($10^{{{-6}}}$ $mol/m^2$)")
     axis[1].set_ylabel(r"BAU NO$_{2}$ ($10^{{{-6}}}$ $mol/m^2$)")
 
-    start_x = 370 if s5p_ver == 1 else 500
-    gap = 15 if s5p_ver == 1 else 20
+    start_x = 500
+    gap = 20
 
-    axis[1].annotate("n = {}".format(len(ds.test_2019[S5P_OBS_COL])), (start_x, 0))
+    # axis[1].annotate("n = {}".format(len(ds.test_2019[S5P_OBS_COL])), (start_x, 0))
+    # axis[1].annotate(
+    #     "N = {}".format(len(ds.test_2019.groupby(["lat", "lon"]).mean())),
+    #     (start_x, gap),
+    # )
+    # axis[1].annotate(
+    #     "$R$ = {:.2f}".format(
+    #         stats.pearsonr(ds.test_2019[S5P_OBS_COL], ds.test_2019[S5P_PRED_COL])[0]
+    #     ),
+    #     (start_x, gap * 2),
+    # )
+    axis[1].annotate("n = {}".format(stats[s5p_ver]["n"]), (start_x, 20))
     axis[1].annotate(
-        "N = {}".format(len(ds.test_2019.groupby(["lat", "lon"]).mean())),
-        (start_x, gap),
+        "N = {}".format(stats[s5p_ver]["N"]),
+        (start_x, gap * 2),
     )
     axis[1].annotate(
-        "$R$ = {:.2f}".format(
-            stats.pearsonr(ds.test_2019[S5P_OBS_COL], ds.test_2019[S5P_PRED_COL])[0]
-        ),
-        (start_x, gap * 2),
+        "$R$ = {:.2f}".format(stats[s5p_ver]["R"]),
+        (start_x, gap * 3),
     )
 
     line = mlines.Line2D([0, 1], [0, 1], color="red", label="1:1 line")
@@ -468,6 +542,14 @@ def plot_pred_true(ds, s5p_ver):
     line.set_transform(transform)
     axis[1].add_line(line)
     axis[1].legend()
+    if fig_name:
+        path_ = f"figures/{fig_name}.tiff"
+        fig.savefig(
+            path_,
+            format="tiff",
+            dpi=300,
+            bbox_inches="tight",
+        )
 
 
 # %%

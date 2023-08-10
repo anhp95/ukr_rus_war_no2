@@ -18,20 +18,23 @@ from tabs import *
 S5P_VERSIONS = ["S5P_v1.x", "S5P_v2.4"]
 
 
-def compare_obs_bau(ds1, ds2):
+def compare_obs_bau(ds1, ds2, fig_name=None):
     bau_var = "BAU_S5P"
     obs_var = "OBS_S5P"
     list_ds = [ds1, ds2]
-    list_var = [obs_var, bau_var]
+    list_var = [obs_var, bau_var, obs_var]
 
-    cmaps = ["YlOrBr", "YlOrBr", "Blues"]
-    sd_s = [BF_SD, LCKDWN_SD]
-    ed_s = [BF_ED, LCKDWN_ED]
+    cmaps = ["YlOrBr", "YlOrBr", "YlOrBr"]
+    dates_2020 = [LCKDWN_SD, LCKDWN_ED]
+    dates_2022 = ["2022-02-24", "2022-07-31"]
+
     # tits = ["Prelockdown", "Lockdown"]
 
-    nrs, ncs = 2, 2
-    w, h = 2 * ncs, 2 * nrs
-    for sd, ed in zip(sd_s, ed_s):
+    nrs, ncs = 2, 3
+    w, h = 5 * ncs, 5 * nrs
+    for date, year, index in zip(
+        [dates_2020, dates_2022], ["2020", "2022"], ["a", "b"]
+    ):
         fig, axes = plt.subplots(nrs, ncs, figsize=(w, h), layout="constrained")
 
         for i, (ds, ver) in enumerate(zip(list_ds, S5P_VERSIONS)):
@@ -39,10 +42,16 @@ def compare_obs_bau(ds1, ds2):
                 ax = axes[i, j]
 
                 ds_var = ds.dw_ds[var]
+                sd, ed = date[0], date[1]
+                if j == 2:
+                    y19 = "2019"
+                    sd, ed = date[0].replace(year, y19), date[1].replace(year, y19)
+                    year = y19
+
                 sel_ds = ds_var.sel(time=slice(sd, ed)).mean("time")
                 cb_mean = sel_ds.plot(cmap=cmap, ax=ax, vmin=10, vmax=50)
 
-                ax.set_title(f"{ver} {var.split('_')[0]}")
+                ax.set_title(f"{ver} {var.split('_')[0]} {year}", fontsize=20)
                 ax.set_xticks([])
                 ax.set_xticklabels([])
                 ax.set_yticks([])
@@ -58,21 +67,25 @@ def compare_obs_bau(ds1, ds2):
             extend="both",
             location="bottom",
         )
-        cb_mean.set_label(NO2_UNIT, size=10)
-        cb_mean.ax.tick_params(labelsize=10)
+        cb_mean.set_label(NO2_UNIT, size=20)
+        cb_mean.ax.tick_params(labelsize=20)
+        if fig_name:
+            path_ = f"figures/{fig_name}_{index}.tiff"
+            fig.savefig(path_, format="tiff", dpi=300)
 
 
-def plt_scatter_map_covid_2alg(df_1, df_2):
+def plt_scatter_map_covid_2alg(df_1, df_2, fig_name=None):
     nrs, ncs = 2, 2
     w, h = 5 * ncs, 4 * nrs
     bound_lv1 = gpd.read_file(UK_SHP_ADM1)
     index_fig = [["1", "2"], ["3", "4"]]
+    fis = ["a", "b"]
     huem = 35
 
     fig1, axes1 = plt.subplots(nrs, ncs, figsize=(w, h), layout="constrained")
     fig2, axes2 = plt.subplots(nrs, ncs, figsize=(w, h), layout="constrained")
 
-    for p, fig, axes in zip(DATE_2020.keys(), [fig1, fig2], [axes1, axes2]):
+    for fi, p, fig, axes in zip(fis, DATE_2020.keys(), [fig1, fig2], [axes1, axes2]):
         for i, (df, v) in enumerate(zip([df_1, df_2], S5P_VERSIONS)):
             for j, col in enumerate(["2020-2019", OBS_BAU_COL]):
                 ax = axes[i, j]
@@ -90,7 +103,7 @@ def plt_scatter_map_covid_2alg(df_1, df_2):
                     edgecolor="black",
                     linewidth=1,
                 )
-                g.set(title=f"({index_fig[i][j]}) {v} - {col} {p}")
+                g.set(title=f"({fi}{index_fig[i][j]}) {v} - {col} \n {p}")
                 ax.get_legend().remove()
                 if i < 1 and j < 1:
                     x, y, arrow_length = 0.05, 0.95, 0.12
@@ -136,9 +149,12 @@ def plt_scatter_map_covid_2alg(df_1, df_2):
             location="bottom",
             shrink=0.4,
         )
+        if fig_name:
+            path_ = f"figures/{fig_name}_{fi}.tiff"
+            fig.savefig(path_, format="tiff", dpi=300)
 
 
-def plt_line_ts_adm_2alg(ds_1, ds_2, dict_city, eng_name):
+def plt_line_ts_adm_2alg(ds_1, ds_2, dict_city, eng_name, fig_name=None):
     list_city = dict_city.keys()
     nrs, ncs = len(list_city), 4
     w, h = 2.3 * ncs, 2 * nrs
@@ -148,7 +164,7 @@ def plt_line_ts_adm_2alg(ds_1, ds_2, dict_city, eng_name):
     subfigs = fig.subfigures(nrs, 1, wspace=0.07)
 
     for i, city in enumerate(list_city):
-        subfigs[i].suptitle(eng_name[city], fontsize="x-large")
+        txt = subfigs[i].suptitle(eng_name[city], fontsize="x-large")
         axes = subfigs[i].subplots(1, ncs, sharey=True)
         for j, (ds, v) in enumerate(zip([ds_1, ds_2], S5P_VERSIONS)):
             df_city = ds[city].mean(["lat", "lon"], skipna=True).to_dataframe()
@@ -216,7 +232,7 @@ def plt_line_ts_adm_2alg(ds_1, ds_2, dict_city, eng_name):
                     handles, labels = ax.get_legend_handles_labels()
                     handles = handles + [cl] + [wl]
                     labels = labels + ["COVID-19 Lockdown"] + ["War start date"]
-                    fig.legend(
+                    lgd = fig.legend(
                         handles,
                         labels,
                         ncol=4,
@@ -226,9 +242,17 @@ def plt_line_ts_adm_2alg(ds_1, ds_2, dict_city, eng_name):
                     )
                 except:
                     pass
+    if fig_name:
+        path_ = f"figures/{fig_name}.tiff"
+        fig.savefig(
+            path_,
+            format="tiff",
+            dpi=300,
+            bbox_inches="tight",
+        )
 
 
-def plt_feature_importance(ds1, ds2):
+def plt_feature_importance(ds1, ds2, fig_name=None):
     nrs, ncs = 1, 2
     w, h = 6 * ncs, 6 * nrs
     fig, axes = plt.subplots(nrs, ncs, figsize=(w, h), layout="constrained")
@@ -246,3 +270,12 @@ def plt_feature_importance(ds1, ds2):
             data=df, y="Feature name", x="Feature importance", orient="h", ax=ax
         )
         ax.set_title(v)
+        ax.set_xlim(0, 16000)
+    if fig_name:
+        path_ = f"figures/{fig_name}.tiff"
+        fig.savefig(
+            path_,
+            format="tiff",
+            dpi=300,
+            bbox_inches="tight",
+        )

@@ -8,6 +8,7 @@ __pycache__/
 # Data dir
 data/
 model/
+figures/
 # Distribution / packaging
 .Python
 build/

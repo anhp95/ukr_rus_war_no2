@@ -42,7 +42,7 @@ ENG_ADM2_NAMES = {
     "Kyiv": "Kyiv",
     "Kharkivskyi": "Kharkiv",
     "Dniprovskyi": "Dnipro",
-    "Zaporizkyi": "Zaporizhia",
+    "Zaporizkyi": "Zaporizhzhia",
     "Kryvorizkyi": "Kryvyi Rih",
 }
 
@@ -67,7 +67,7 @@ DICT_PPLS = {
     # "Vuglegirska power station",
 }
 ENG_CPP_NAMES = {
-    "Zaporizhia TPP": "Zaporizhia power station",
+    "Zaporizhia TPP": "Zaporizhzhia power station",
     "Mironivskaya TEC": "Mironivskaya power station",
     "Zmiivska power station": "Zmiivska power station",
     "Luhanska": "Luhansk power station",
@@ -85,8 +85,8 @@ BF_SD = "2020-03-01"
 BF_ED = "2020-03-15"
 
 DATE_2020 = {
-    "Pre-lockdown (03/01 - 03/15)": (BF_SD, BF_ED),
-    "Lockdown (04/06 - 05/10)": (LCKDWN_SD, LCKDWN_ED),
+    "Pre-lockdown (1-15 March)": (BF_SD, BF_ED),
+    "Lockdown (6 April - 10 May)": (LCKDWN_SD, LCKDWN_ED),
 }
 
 WAR_SD = "2022-02-24"
@@ -128,17 +128,17 @@ ADM3_CITIES = [
 ]
 
 FEATURE_NAMES = [
-    "Surface NO2",
+    r"Surface $NO_2$ concentration",
     "Wind speed (U)",
     "Wind speed (V)",
     "Dewpoint temperature",
-    "Temperature",
+    "Air Temperature",
     "Boundary layer height",
     "Geopotential",
     "Relative humidity",
-    "Population",
-    "Day of week",
-    "Day of year",
+    "Population count",
+    "Day of the week",
+    "Julian date",
     "Latitude",
     "Longitude",
 ]
