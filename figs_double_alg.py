@@ -43,15 +43,20 @@ def compare_obs_bau(ds1, ds2, fig_name=None):
 
                 ds_var = ds.dw_ds[var]
                 sd, ed = date[0], date[1]
+
+                y = year
+
                 if j == 2:
                     y19 = "2019"
                     sd, ed = date[0].replace(year, y19), date[1].replace(year, y19)
-                    year = y19
+                    y = y19
+
+                print(sd, ed)
 
                 sel_ds = ds_var.sel(time=slice(sd, ed)).mean("time")
                 cb_mean = sel_ds.plot(cmap=cmap, ax=ax, vmin=10, vmax=50)
 
-                ax.set_title(f"{ver} {var.split('_')[0]} {year}", fontsize=20)
+                ax.set_title(f"{ver} {var.split('_')[0]} {y}", fontsize=20)
                 ax.set_xticks([])
                 ax.set_xticklabels([])
                 ax.set_yticks([])
