@@ -138,7 +138,7 @@ FEATURE_NAMES = [
     "Relative humidity",
     "Population count",
     "Day of the week",
-    "Julian date",
+    "Julian day of the year",
     "Latitude",
     "Longitude",
 ]

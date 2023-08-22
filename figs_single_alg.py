@@ -188,6 +188,10 @@ def plot_obs_year(mode="gee", fig_name=None):
                 axi[i, j].set_xticklabels([])
                 axi[i, j].set_yticks([])
                 axi[i, j].set_yticklabels([])
+                axi[i, j].spines['top'].set_visible(False)
+                axi[i, j].spines['right'].set_visible(False)
+                axi[i, j].spines['bottom'].set_visible(False)
+                axi[i, j].spines['left'].set_visible(False)
 
     cb_count = fig_count.colorbar(
         cb_count,

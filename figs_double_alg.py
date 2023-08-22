@@ -272,7 +272,12 @@ def plt_feature_importance(ds1, ds2, fig_name=None):
         sns.set_theme(style="whitegrid")
         ax = axes[i]
         sns.barplot(
-            data=df, y="Feature name", x="Feature importance", orient="h", ax=ax
+            data=df,
+            y="Feature name",
+            x="Feature importance",
+            orient="h",
+            ax=ax,
+            color="#1b9e77",
         )
         ax.set_title(v)
         ax.set_xlim(0, 16000)
